@@ -1,5 +1,3 @@
-import DateRange from "react-datepicker";
-
 export interface TableHeader {
   key: string;
   label: string;
@@ -38,7 +36,7 @@ export interface NewInspectionModalProps {
 }
 
 export interface FilterCriteria {
-  [key: string]: string | DateRange | null;
+  [key: string]: string | Date | [Date | null, Date | null] | null;
 }
 
 export interface FetchParams {
@@ -49,7 +47,7 @@ export interface FetchParams {
 
 export interface TableData {
   headers: TableHeader[];
-  rows: Record<string, unknown>[];
+  rows: Record<string, string | number | Date | unknown>[];
   filterOptions: Record<string, string[]>;
   totalCount: number;
 }

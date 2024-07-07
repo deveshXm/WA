@@ -25,7 +25,7 @@ const FilterBar: React.FC<FilterBarProps> = ({ headers, filterOptions, onFilterC
   const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
 
   const handleFilterChange = (key: string, value: string | [Date | null, Date | null] | null) => {
-    const newFilters = { ...filters, [key]: value };
+    const newFilters: FilterCriteria = { ...filters, [key]: value };
     setFilters(newFilters);
     onFilterChange(newFilters);
   };
@@ -45,8 +45,8 @@ const FilterBar: React.FC<FilterBarProps> = ({ headers, filterOptions, onFilterC
             <DateRangeContainer key={header.key}>
               <DatePicker
                 selectsRange={true}
-                startDate={dateRange[0]}
-                endDate={dateRange[1]}
+                startDate={dateRange[0] || undefined}
+                endDate={dateRange[1] || undefined}
                 onChange={handleDateChange}
                 isClearable={true}
                 placeholderText="Select date range"

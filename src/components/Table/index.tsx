@@ -142,7 +142,7 @@ const Table: React.FC<TableProps> = ({ data, loading, error, page, pageSize, onP
                 <TableRow key={rowIndex}>
                   {data.headers.map((header, index) => (
                     <TableCell key={header.key} overflow={!!header.overflow} width={headerWidths[index]}>
-                      {row[header.key]}
+                      {String(row[header.key])}
                     </TableCell>
                   ))}
                 </TableRow>
