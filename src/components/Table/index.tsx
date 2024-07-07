@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import styled from "styled-components";
-import { TableProps } from "../../types";
+import { CellData, TableProps } from "../../types";
 
 const TableWrapper = styled.div`
   display: flex;
@@ -47,7 +47,7 @@ const TableRow = styled.tr`
   }
 `;
 
-const TableCell = styled.td<{ overflow: boolean; width: string }>`
+const TableCell = styled.td<{ overflow: boolean; width: string; customStyle?: string }>`
   padding: 10px;
   border-bottom: 1px solid #ddd;
   width: ${(props) => props.width};
@@ -58,6 +58,7 @@ const TableCell = styled.td<{ overflow: boolean; width: string }>`
     overflow: hidden;
     text-overflow: ellipsis;
   `}
+  ${(props) => props.customStyle}
 `;
 
 const PaginationContainer = styled.div`
@@ -140,11 +141,14 @@ const Table: React.FC<TableProps> = ({ data, loading, error, page, pageSize, onP
             <tbody>
               {data.rows.map((row, rowIndex) => (
                 <TableRow key={rowIndex}>
-                  {data.headers.map((header, index) => (
-                    <TableCell key={header.key} overflow={!!header.overflow} width={headerWidths[index]}>
-                      {String(row[header.key])}
-                    </TableCell>
-                  ))}
+                  {data.headers.map((header, index) => {
+                    const cellData = row[header.key] as CellData;
+                    return (
+                      <TableCell key={header.key} overflow={!!header.overflow} width={headerWidths[index]} customStyle={cellData.style}>
+                        {String(cellData.value)}
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               ))}
             </tbody>

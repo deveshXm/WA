@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import { NewInspectionModalProps } from '../../types';
-import Button from '../Button';
+import React, { useState } from "react";
+import styled from "styled-components";
+import { CellData, NewInspectionModalProps } from "../../types";
+import Button from "../Button";
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -35,10 +35,10 @@ const Input = styled.input`
 `;
 
 const NewInspectionModal: React.FC<NewInspectionModalProps> = ({ onClose, onSubmit, headers }) => {
-  const [formData, setFormData] = useState<Record<string, unknown>>({});
+  const [formData, setFormData] = useState<Record<string, CellData>>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({ ...formData, [e.target.name]: { value: e.target.value, style: "" } });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -52,24 +52,10 @@ const NewInspectionModal: React.FC<NewInspectionModalProps> = ({ onClose, onSubm
         <h2>New Inspection</h2>
         <Form onSubmit={handleSubmit}>
           {headers.map((header) => {
-            if (header.key === 'createdAt') {
-              return (
-                <Input
-                  key={header.key}
-                  type="date"
-                  name={header.key}
-                  onChange={handleChange}
-                />
-              );
+            if (header.key === "createdAt") {
+              return <Input key={header.key} type="date" name={header.key} onChange={handleChange} />;
             }
-            return (
-              <Input
-                key={header.key}
-                name={header.key}
-                placeholder={header.label}
-                onChange={handleChange}
-              />
-            );
+            return <Input key={header.key} name={header.key} placeholder={header.label} onChange={handleChange} />;
           })}
           <Button type="submit">Create Inspection</Button>
           <Button onClick={onClose}>Cancel</Button>

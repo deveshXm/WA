@@ -35,19 +35,34 @@ export interface NewInspectionModalProps {
   headers: TableHeader[];
 }
 
-export interface FilterCriteria {
-  [key: string]: string | Date | [Date | null, Date | null] | null;
-}
-
 export interface FetchParams {
   page: number;
   pageSize: number;
   filters: FilterCriteria;
 }
 
+// Add this new interface
+export interface CellData {
+  value: string | number | Date;
+  style?: string;
+}
+
+// Update the TableData interface
 export interface TableData {
   headers: TableHeader[];
-  rows: Record<string, string | number | Date | unknown>[];
+  rows: Record<string, CellData | unknown>[];
   filterOptions: Record<string, string[]>;
   totalCount: number;
+}
+
+// Update FetchParams interface if needed
+export interface FetchParams {
+  page: number;
+  pageSize: number;
+  filters: FilterCriteria;
+}
+
+// Update FilterCriteria if needed
+export interface FilterCriteria {
+  [key: string]: string | Date | [Date | null, Date | null] | null;
 }

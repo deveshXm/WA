@@ -8,17 +8,18 @@ export const fetchTableData = async (params: FetchParams): Promise<TableData> =>
   await new Promise((resolve) => setTimeout(resolve, 500));
   const { page, pageSize, filters } = params;
   const filteredData = data.filter((row) => {
-    return Object.entries(filters).every(([key, value]) => {
-      if (value === null || value === "") return true;
-      if (key === "createdAt" && Array.isArray(value)) {
-        const [start, end] = value;
+    return Object.entries(filters).every(([key, filterValue]) => {
+      if (filterValue === null || filterValue === "") return true;
+      const cellData = row[key as keyof typeof row];
+      if (key === "createdAt" && Array.isArray(filterValue)) {
+        const [start, end] = filterValue;
         if (start && end) {
-          const rowDate = new Date(row[key]);
+          const rowDate = new Date(cellData.value as string);
           return isWithinInterval(rowDate, { start, end });
         }
         return true;
       }
-      return row[key as keyof typeof row] === value;
+      return cellData.value === filterValue;
     });
   });
 
@@ -43,10 +44,10 @@ export const fetchTableData = async (params: FetchParams): Promise<TableData> =>
     ],
     rows: paginatedData,
     filterOptions: {
-      inspectionStatus: ["OPEN", "ONGOING", "SUBMITTED"],
-      lotStatusVerdict: ["PENDING", "IN_PROGRESS", "APPROVED", "REJECTED"],
-      icPartName: [...new Set(data.map((row) => row.icPartName))],
-      supplierName: [...new Set(data.map((row) => row.supplierName))],
+      inspectionStatus: [...new Set(data.map((row) => row.inspectionStatus.value as string))],
+      lotStatusVerdict: [...new Set(data.map((row) => row.lotStatusVerdict.value as string))],
+      icPartName: [...new Set(data.map((row) => row.icPartName.value as string))],
+      supplierName: [...new Set(data.map((row) => row.supplierName.value as string))],
     },
     totalCount,
   };
