@@ -1,8 +1,11 @@
-import { TableData, FetchParams } from "../types";
-import { isWithinInterval } from "date-fns";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { isWithinInterval } from "date-fns";
+
 import data from "../data.ts";
+import { convertTimeFormat } from "../utils/convertTimeFormat.ts";
+
+// DUMMY API CALLS
 
 export const fetchTableData = async (params: FetchParams): Promise<TableData> => {
   await new Promise((resolve) => setTimeout(resolve, 500));
@@ -31,18 +34,21 @@ export const fetchTableData = async (params: FetchParams): Promise<TableData> =>
 
   return {
     headers: [
-      { key: "inspectionStatus", label: "Inspection Status", type: "string", filter: true, overflow: true },
-      { key: "inspectionId", label: "Inspection ID", type: "string", filter: false, overflow: true },
-      { key: "lotStatusVerdict", label: "Lot Status/Verdict", type: "string", filter: true, overflow: true },
-      { key: "icPartName", label: "IC Part Name", type: "string", filter: true, overflow: true },
-      { key: "supplierName", label: "Supplier Name", type: "string", filter: true, overflow: true },
+      { key: "inspectionStatus", label: "Inspection Status", type: "string", filter: true },
+      { key: "inspectionId", label: "Inspection ID", type: "string", filter: false },
+      { key: "lotStatusVerdict", label: "Lot Status/Verdict", type: "string", filter: true },
+      { key: "icPartName", label: "IC Part Name", type: "string", filter: true },
+      { key: "supplierName", label: "Supplier Name", type: "string", filter: true },
       { key: "totalOrderQuantity", label: "Total Order Quantity", type: "number", filter: false },
       { key: "samplingSize", label: "Sampling Size", type: "number", filter: false },
       { key: "totalOK", label: "Total OK", type: "number", filter: false },
       { key: "totalNOK", label: "Total NOK", type: "number", filter: false },
-      { key: "createdAt", label: "Created At", type: "date", filter: true, overflow: false },
+      { key: "createdAt", label: "Created At", type: "date", filter: true },
     ],
-    rows: paginatedData,
+    rows: paginatedData.map((data) => {
+      data.createdAt.value = convertTimeFormat(data.createdAt.value as string);
+      return data;
+    }),
     filterOptions: {
       inspectionStatus: [...new Set(data.map((row) => row.inspectionStatus.value as string))],
       lotStatusVerdict: [...new Set(data.map((row) => row.lotStatusVerdict.value as string))],
@@ -53,18 +59,22 @@ export const fetchTableData = async (params: FetchParams): Promise<TableData> =>
   };
 };
 
-export const createInspection = async (inspection: Record<string, unknown>): Promise<Record<string, unknown>> => {
+export const createInspection = async (inspection: TableRow): Promise<TableRow> => {
   await new Promise((resolve) => setTimeout(resolve, 500));
 
-  return {
-    ...inspection,
-    inspectionId: `INS-${Math.floor(Math.random() * 1000)}`,
-    createdAt: new Date().toISOString(),
-  };
+  inspection.inspectionStatus.style = `color: #ffffff;padding: 5px;border-radius:5px; background-color:${
+    inspection.inspectionStatus.value === "OPEN" ? "gray" : inspection.inspectionStatus.value === "ONGOING" ? "orange" : "#007bff"
+  }; font-weight: 600;width:fit-content`;
+  inspection.inspectionId.style = "color: #007bff';";
+  inspection.totalOK.style = "color: #28a745;";
+  inspection.totalNOK.style = "color: #dc3545;";
+
+  data.push(inspection);
+
+  return inspection;
 };
 
 export const fetchInspectionPDF = async (tableData: TableData): Promise<Blob> => {
-  // Simulate API call delay
   await new Promise((resolve) => setTimeout(resolve, 1000));
   const doc = new jsPDF("l", "mm", "a4");
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -75,7 +85,7 @@ export const fetchInspectionPDF = async (tableData: TableData): Promise<Blob> =>
 
   // Prepare table data
   const headers = tableData.headers.map((header) => header.label);
-  const body = tableData.rows.map((row) => tableData.headers.map((header) => row[header.key]));
+  const body = tableData.rows.map((row) => tableData.headers.map((header) => row[header.key].value));
 
   // Generate table
   (doc as any).autoTable({

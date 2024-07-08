@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { TableData, FilterCriteria } from "../types";
 import { fetchTableData, createInspection } from "../services/api";
 
 export const useInspections = () => {
@@ -31,7 +30,7 @@ export const useInspections = () => {
     setPage(1); // Reset to first page when filters change
   };
 
-  const addInspection = async (newInspection: Record<string, unknown>) => {
+  const addInspection = async (newInspection: TableRow) => {
     try {
       await createInspection(newInspection);
       loadData(); // Reload data to include the new inspection

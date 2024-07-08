@@ -1,24 +1,8 @@
 import React, { useState } from "react";
-import styled from "styled-components";
-import DatePicker from "react-datepicker";
-import { FilterBarProps, FilterCriteria } from "../../types";
 import "react-datepicker/dist/react-datepicker.css";
-
-const FilterContainer = styled.div`
-  display: flex;
-  gap: 10px;
-`;
-
-const Select = styled.select`
-  padding: 5px;
-  border-radius: 4px;
-`;
-
-const DateRangeContainer = styled.div`
-  display: flex;
-  align-items: center;
-  z-index: 3;
-`;
+import Select from "../common/Select";
+import { FilterContainer } from "./styles";
+import DateRangePicker from "./DateRangePicker";
 
 const FilterBar: React.FC<FilterBarProps> = ({ headers, filterOptions, onFilterChange }) => {
   const [filters, setFilters] = useState<FilterCriteria>({});
@@ -41,26 +25,14 @@ const FilterBar: React.FC<FilterBarProps> = ({ headers, filterOptions, onFilterC
         if (!header.filter) return null;
 
         if (header.type === "date") {
-          return (
-            <DateRangeContainer key={header.key}>
-              <DatePicker
-                selectsRange={true}
-                startDate={dateRange[0] || undefined}
-                endDate={dateRange[1] || undefined}
-                onChange={handleDateChange}
-                isClearable={true}
-                placeholderText="Select date range"
-                dateFormat="yyyy-MM-dd"
-              />
-            </DateRangeContainer>
-          );
+          return <DateRangePicker header={header} dateRange={dateRange} handleDateChange={handleDateChange} />;
         }
 
         if (filterOptions[header.key]) {
           return (
             <Select key={header.key} onChange={(e) => handleFilterChange(header.key, e.target.value)}>
               <option value="">All {header.label}</option>
-              {filterOptions[header.key].map((option) => (
+              {filterOptions[header.key].map((option: string) => (
                 <option key={option} value={option}>
                   {option}
                 </option>

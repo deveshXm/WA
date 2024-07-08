@@ -1,40 +1,9 @@
 import React, { useState } from "react";
-import styled from "styled-components";
-import { CellData, NewInspectionModalProps } from "../../types";
-import Button from "../Button";
+import Button from "../common/Button";
+import Modal from "../common/Modal";
+import { Form, Input } from "./styles";
 
-const ModalOverlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
-const ModalContent = styled.div`
-  background-color: white;
-  padding: 20px;
-  border-radius: 4px;
-  width: 400px;
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-`;
-
-const Input = styled.input`
-  padding: 5px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-`;
-
-const NewInspectionModal: React.FC<NewInspectionModalProps> = ({ onClose, onSubmit, headers }) => {
+const NewInspectionModal: React.FC<NewInspectionModalProps> = ({ isOpen, onClose, onSubmit, headers }) => {
   const [formData, setFormData] = useState<Record<string, CellData>>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,21 +16,18 @@ const NewInspectionModal: React.FC<NewInspectionModalProps> = ({ onClose, onSubm
   };
 
   return (
-    <ModalOverlay>
-      <ModalContent>
-        <h2>New Inspection</h2>
-        <Form onSubmit={handleSubmit}>
-          {headers.map((header) => {
-            if (header.key === "createdAt") {
-              return <Input key={header.key} type="date" name={header.key} onChange={handleChange} />;
-            }
-            return <Input key={header.key} name={header.key} placeholder={header.label} onChange={handleChange} />;
-          })}
-          <Button type="submit">Create Inspection</Button>
-          <Button onClick={onClose}>Cancel</Button>
-        </Form>
-      </ModalContent>
-    </ModalOverlay>
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <h2>New Inspection</h2>
+      <Form onSubmit={handleSubmit}>
+        {headers.map((header) => {
+          return <Input key={header.key} name={header.key} placeholder={header.label} onChange={handleChange} type={header.type} required={true} />;
+        })}
+        <Button variant="primary" type="submit">
+          Create Inspection
+        </Button>
+        <Button onClick={onClose}>Cancel</Button>
+      </Form>
+    </Modal>
   );
 };
 

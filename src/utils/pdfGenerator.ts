@@ -1,4 +1,3 @@
-import { TableData } from "../types";
 import { fetchInspectionPDF } from "../services/api";
 
 export const generatePDF = async (tableData: TableData) => {
