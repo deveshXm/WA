@@ -38,7 +38,7 @@ const Table: React.FC<TableProps> = ({ data, loading, error, page, pageSize, onP
     return () => {
       bodyElement.removeEventListener("scroll", syncScroll);
     };
-  }, [data]); // Re-run the effect when data changes
+  }, [data]);
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;

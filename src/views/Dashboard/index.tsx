@@ -1,40 +1,49 @@
 import React, { useState } from "react";
-
 import Table from "../../components/Table";
 import Button from "../../components/common/Button";
 import FilterBar from "../../components/FilterBar";
 import NewInspectionModal from "../../components/NewInspectionModal";
-
-import { generatePDF } from "../../utils/pdfGenerator";
 import { useInspections } from "../../hooks/useInspections";
-
 import downloadIcon from "../../assets/download.svg";
-import { Container, Header, Seperator, TableHeader, TableHeading, TableRowCount, TableTitle } from "./styles";
+import { Container, Header, Separator, TableHeader, TableHeading, TableRowCount, TableTitle } from "./styles";
+import { fetchInspectionPDF } from "../../services/api";
 
 const Dashboard: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { tableData, loading, error, updateFilters, addInspection, page, pageSize, setPage, setPageSize } = useInspections();
 
   const handleDownloadPDF = async () => {
-    if (tableData) {
-      try {
-        await generatePDF(tableData);
-      } catch (error) {
-        console.error("Error generating PDF:", error);
-        alert("Failed to generate PDF. Please try again.");
-      }
+    try {
+      const pdfBlob = await fetchInspectionPDF();
+      const url = URL.createObjectURL(pdfBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "inspection_report.pdf";
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
     }
+  };
+
+  const handleNewInspection = () => setIsModalOpen(true);
+
+  const handleCloseModal = () => setIsModalOpen(false);
+
+  const handleSubmitInspection = (newInspection: TableRow) => {
+    addInspection(newInspection);
+    setIsModalOpen(false);
   };
 
   return (
     <Container>
       <Header>
         {tableData && <FilterBar headers={tableData.headers} filterOptions={tableData.filterOptions} onFilterChange={updateFilters} />}
-        <Button onClick={() => setIsModalOpen(true)} variant="primary">
+        <Button onClick={handleNewInspection} variant="primary">
           + New Inspection
         </Button>
       </Header>
-      <Seperator />
+      <Separator />
       {tableData && (
         <>
           <TableHeader>
@@ -50,15 +59,7 @@ const Dashboard: React.FC = () => {
         </>
       )}
       {isModalOpen && tableData && (
-        <NewInspectionModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onSubmit={(newInspection) => {
-            addInspection(newInspection);
-            setIsModalOpen(false);
-          }}
-          headers={tableData?.headers || []}
-        />
+        <NewInspectionModal isOpen={isModalOpen} onClose={handleCloseModal} onSubmit={handleSubmitInspection} headers={tableData.headers || []} />
       )}
     </Container>
   );

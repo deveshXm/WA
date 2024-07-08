@@ -7,6 +7,26 @@ import { convertTimeFormat } from "../utils/convertTimeFormat.ts";
 
 // DUMMY API CALLS
 
+const headers: TableHeader[] = [
+  { key: "inspectionStatus", label: "Inspection Status", type: "string", filter: true },
+  { key: "inspectionId", label: "Inspection ID", type: "string", filter: false },
+  { key: "lotStatusVerdict", label: "Lot Status/Verdict", type: "string", filter: true },
+  { key: "icPartName", label: "IC Part Name", type: "string", filter: true },
+  { key: "supplierName", label: "Supplier Name", type: "string", filter: true },
+  { key: "totalOrderQuantity", label: "Total Order Quantity", type: "number", filter: false },
+  { key: "samplingSize", label: "Sampling Size", type: "number", filter: false },
+  { key: "totalOK", label: "Total OK", type: "number", filter: false },
+  { key: "totalNOK", label: "Total NOK", type: "number", filter: false },
+  { key: "createdAt", label: "Created At", type: "date", filter: true },
+];
+
+const filterOptions: FilterOptions = {
+  inspectionStatus: [...new Set(data.map((row) => row.inspectionStatus.value as string))],
+  lotStatusVerdict: [...new Set(data.map((row) => row.lotStatusVerdict.value as string))],
+  icPartName: [...new Set(data.map((row) => row.icPartName.value as string))],
+  supplierName: [...new Set(data.map((row) => row.supplierName.value as string))],
+};
+
 export const fetchTableData = async (params: FetchParams): Promise<TableData> => {
   await new Promise((resolve) => setTimeout(resolve, 500));
   const { page, pageSize, filters } = params;
@@ -33,28 +53,12 @@ export const fetchTableData = async (params: FetchParams): Promise<TableData> =>
   const paginatedData = filteredData.slice(startIndex, endIndex);
 
   return {
-    headers: [
-      { key: "inspectionStatus", label: "Inspection Status", type: "string", filter: true },
-      { key: "inspectionId", label: "Inspection ID", type: "string", filter: false },
-      { key: "lotStatusVerdict", label: "Lot Status/Verdict", type: "string", filter: true },
-      { key: "icPartName", label: "IC Part Name", type: "string", filter: true },
-      { key: "supplierName", label: "Supplier Name", type: "string", filter: true },
-      { key: "totalOrderQuantity", label: "Total Order Quantity", type: "number", filter: false },
-      { key: "samplingSize", label: "Sampling Size", type: "number", filter: false },
-      { key: "totalOK", label: "Total OK", type: "number", filter: false },
-      { key: "totalNOK", label: "Total NOK", type: "number", filter: false },
-      { key: "createdAt", label: "Created At", type: "date", filter: true },
-    ],
+    headers,
     rows: paginatedData.map((data) => {
       data.createdAt.value = convertTimeFormat(data.createdAt.value as string);
       return data;
     }),
-    filterOptions: {
-      inspectionStatus: [...new Set(data.map((row) => row.inspectionStatus.value as string))],
-      lotStatusVerdict: [...new Set(data.map((row) => row.lotStatusVerdict.value as string))],
-      icPartName: [...new Set(data.map((row) => row.icPartName.value as string))],
-      supplierName: [...new Set(data.map((row) => row.supplierName.value as string))],
-    },
+    filterOptions,
     totalCount,
   };
 };
@@ -74,8 +78,14 @@ export const createInspection = async (inspection: TableRow): Promise<TableRow> 
   return inspection;
 };
 
-export const fetchInspectionPDF = async (tableData: TableData): Promise<Blob> => {
+export const fetchInspectionPDF = async (): Promise<Blob> => {
   await new Promise((resolve) => setTimeout(resolve, 1000));
+  const tableData: TableData = {
+    headers,
+    rows: data,
+    filterOptions,
+    totalCount: 15,
+  };
   const doc = new jsPDF("l", "mm", "a4");
   const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -84,12 +94,12 @@ export const fetchInspectionPDF = async (tableData: TableData): Promise<Blob> =>
   doc.text("Inspection Report", pageWidth / 2, 15, { align: "center" });
 
   // Prepare table data
-  const headers = tableData.headers.map((header) => header.label);
+  const head = [tableData.headers.map((header) => header.label)];
   const body = tableData.rows.map((row) => tableData.headers.map((header) => row[header.key].value));
 
   // Generate table
   (doc as any).autoTable({
-    head: [headers],
+    head,
     body,
     startY: 25,
     theme: "grid",

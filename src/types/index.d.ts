@@ -3,12 +3,13 @@ declare global {
 
   type FilterOptions = Reacord<string, string[]>;
 
+  type FilterValue = string | [Date | null, Date | null] | null;
+
   interface TableHeader {
     key: string;
     label: string;
     type: "string" | "number" | "date";
     filter: boolean;
-    overflow?: boolean;
   }
 
   interface TableData {
